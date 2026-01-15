@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QR Code Generator
 
-## Getting Started
+🔳 Generatore di QR Code gratuito e open source. Crea QR code per URL, WiFi, contatti, email e altro.
 
-First, run the development server:
+**Live Demo:** [qr.bi-gen.it](https://qr.bi-gen.it)
+
+## ✨ Funzionalità
+
+- **7 tipi di QR Code supportati:**
+  - 🔗 URL - Link a siti web
+  - 📝 Testo - Testo libero
+  - 📶 WiFi - Condividi credenziali di rete
+  - 👤 Contatto (vCard) - Biglietti da visita digitali
+  - ✉️ Email - Link mailto con oggetto precompilato
+  - 📞 Telefono - Chiamata diretta
+  - 💬 SMS - Messaggio precompilato
+
+- **Personalizzazione:**
+  - Colore QR e sfondo personalizzabili
+  - Dimensioni regolabili (128px - 512px)
+  - Export in PNG o SVG
+
+- **Privacy First:**
+  - Generazione completamente client-side
+  - Nessun dato inviato a server esterni
+  - Nessuna registrazione richiesta
+
+## 🚀 Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Styling:** Tailwind CSS v4
+- **QR Generation:** qrcode library
+- **Language:** TypeScript
+
+## 📦 Installazione
 
 ```bash
+# Clona il repository
+git clone https://github.com/lorenzogirardi/qr-code.git
+cd qr-code
+
+# Installa le dipendenze
+npm install
+
+# Avvia in sviluppo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build per produzione
+npm run build
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔧 Configurazione
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Il progetto è configurato per funzionare out-of-the-box. Per personalizzare:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Analytics** (opzionale): Modifica `ANALYTICS_URL` in `src/app/page.tsx`
+2. **Porta**: Di default usa porta 3000, modificabile con `PORT` env var
 
-## Learn More
+## 📁 Struttura Progetto
 
-To learn more about Next.js, take a look at the following resources:
+```
+qr-code/
+├── src/
+│   └── app/
+│       ├── page.tsx      # Componente principale QR Generator
+│       ├── globals.css   # Stili globali Tailwind
+│       ├── layout.tsx    # Layout con metadata
+│       └── icon.jpg      # Favicon
+├── public/               # Asset statici
+├── package.json
+└── README.md
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🌐 Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Con PM2 (Produzione)
 
-## Deploy on Vercel
+```bash
+npm run build
+pm2 start npm --name "qr-code" -- start -- -p 3003
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Con Docker
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+## 📄 License
+
+MIT License - Vedi [LICENSE](LICENSE) per i dettagli.
+
+## 🔗 Altri Tool
+
+Parte della suite [BI-Gen Tools](https://bi-gen.it/tools):
+- [HTML to PDF Converter](https://html-to-pdf.bi-gen.it)
+- [QR Code Generator](https://qr.bi-gen.it)
+
+---
+
+Made with ❤️ by [BI-Gen](https://bi-gen.it)
