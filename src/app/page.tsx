@@ -7,12 +7,29 @@ type QRType = 'url' | 'text' | 'wifi' | 'vcard' | 'email' | 'phone' | 'sms';
 
 const ANALYTICS_URL = 'https://dashboard.bi-gen.it';
 
+interface QuotaInfo {
+  daily: { used: number; limit: number };
+}
+
+// Track page view
+function trackPageView() {
+  fetch(`${ANALYTICS_URL}/api/track/pageview`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      project: 'qr-code',
+      path: window.location.pathname,
+      referrer: document.referrer
+    })
+  }).catch(() => {});
+}
+
 export default function QRGenerator() {
   const [activeTab, setActiveTab] = useState<QRType>('url');
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [qrSvg, setQrSvg] = useState<string>('');
   const [showOptions, setShowOptions] = useState(false);
-  const [generationCount, setGenerationCount] = useState(0);
+  const [quota, setQuota] = useState<QuotaInfo | null>(null);
 
   // Form fields
   const [url, setUrl] = useState('');
@@ -35,17 +52,27 @@ export default function QRGenerator() {
   const [fgColor, setFgColor] = useState('#000000');
   const [bgColor, setBgColor] = useState('#FFFFFF');
 
-  // Track page view
+  // Fetch quota (this also handles IP filtering server-side)
+  const fetchQuota = async () => {
+    try {
+      const response = await fetch(`${ANALYTICS_URL}/api/quota/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project: 'qr-code', dailyLimit: 100, monthlyLimit: 1000 })
+      });
+      const data = await response.json();
+      if (data.daily) {
+        setQuota({ daily: data.daily });
+      }
+    } catch {
+      // Ignore quota fetch errors
+    }
+  };
+
+  // Track page view and fetch quota on mount
   useEffect(() => {
-    fetch(`${ANALYTICS_URL}/api/track/pageview`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        project: 'qr-code',
-        path: window.location.pathname,
-        referrer: document.referrer
-      })
-    }).catch(() => {});
+    trackPageView();
+    fetchQuota();
   }, []);
 
   const generateQRData = useCallback((): string => {
@@ -103,7 +130,8 @@ export default function QRGenerator() {
           fileSize: 0
         }),
       });
-      setGenerationCount(prev => prev + 1);
+      // Refresh quota after download
+      fetchQuota();
     } catch {}
   };
 
@@ -480,9 +508,10 @@ export default function QRGenerator() {
                 </button>
               </div>
 
-              {generationCount > 0 && (
+              {/* Quota info */}
+              {quota && (
                 <p className="text-xs text-gray-500 mt-4">
-                  {generationCount} QR scaricati in questa sessione
+                  {quota.daily.used} QR generati oggi
                 </p>
               )}
             </div>
